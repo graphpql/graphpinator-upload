@@ -12,6 +12,13 @@ final class UploadType extends \Graphpinator\Type\ScalarType
     By GraphQL viewpoint it is scalar type, but it must be used as input only.;
     NOWDOC;
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->setSpecifiedBy('https://github.com/jaydenseric/graphql-multipart-request-spec');
+    }
+
     public function validateNonNullValue(mixed $rawValue) : bool
     {
         return $rawValue instanceof \Psr\Http\Message\UploadedFileInterface;
