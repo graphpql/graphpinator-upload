@@ -154,7 +154,6 @@ final class TestSchema
         };
     }
 
-
     public static function getUploadType() : \Graphpinator\Type\Type
     {
         return new class extends \Graphpinator\Type\Type
