@@ -39,7 +39,7 @@ $graphpinator = new \Graphpinator\Graphpinator(
 
 > For more information visit [constraint directives package](https://github.com/infinityloop-dev/graphpinator-constraint-directives).
 
-## Known limitions
+## Known limitations
 
 - Currently this Module can place files only to variable values and not to arguments directly.
     - This is done to ensure implementation simplicity & compatibility with other modules.
