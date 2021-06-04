@@ -43,4 +43,4 @@ $graphpinator = new \Graphpinator\Graphpinator(
 
 - Currently, this Module can place files only to variable values and not to arguments directly.
     - This is done to ensure implementation simplicity & compatibility with other modules.
-    - There is probably no benefit in placing the files directly to arguments. If you stumble upon some important edge scenario, please open an issue and we can discuss possible solutions here.
+    - There is probably no benefit in placing the files directly to arguments. If you stumble upon some important edge scenario, please open an issue and we can discuss possible solution here.
