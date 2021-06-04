@@ -17,7 +17,7 @@ Install package using composer
 
 1. Implement `FileProvider`
 
-`FileProvider` is a service which extracts files from multipart request by their key. Each HTTP framework provides it's own implementation and `FileProvider` serves as an adapter. Framework specific implementations can be found in Graphpinator packages for according framework, eg `infinityloop-dev/graphpinator-nette` contains `FileProvider` implementaion for Nette's HTTP abstraction.
+`FileProvider` is a service that extracts files from a multipart request by their key. Each HTTP framework provides its own implementation and `FileProvider` serves as an adapter. Framework specific implementations can be found in Graphpinator packages for according framework, eg `infinityloop-dev/graphpinator-nette` contains `FileProvider` implementation for Nette's HTTP abstraction.
 
 2. Register `UploadModule` as GraPHPinator module:
 
@@ -41,6 +41,6 @@ $graphpinator = new \Graphpinator\Graphpinator(
 
 ## Known limitations
 
-- Currently this Module can place files only to variable values and not to arguments directly.
+- Currently, this Module can place files only to variable values and not to arguments directly.
     - This is done to ensure implementation simplicity & compatibility with other modules.
-    - There is probably no benefit in placing the files directly to arguments. If you stumble upon some important edge scenario, please open an issue and we can discuss possible solution here.
+    - There is probably no benefit in placing the files directly to arguments. If you stumble upon some important edge scenario, please open an issue and we can discuss possible solutions here.
