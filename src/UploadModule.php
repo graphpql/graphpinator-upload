@@ -8,7 +8,9 @@ final class UploadModule implements \Graphpinator\Module\Module
 {
     use \Nette\SmartObject;
 
-    public function __construct(private FileProvider $fileProvider)
+    public function __construct(
+        private FileProvider $fileProvider,
+    )
     {
     }
 
