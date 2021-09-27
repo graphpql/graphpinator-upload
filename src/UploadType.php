@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Graphpinator\Upload;
 
-final class UploadType extends \Graphpinator\Type\ScalarType
+final class UploadType extends \Graphpinator\Typesystem\ScalarType
 {
     protected const NAME = 'Upload';
     protected const DESCRIPTION = <<<'NOWDOC'

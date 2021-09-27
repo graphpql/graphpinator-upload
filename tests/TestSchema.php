@@ -13,7 +13,7 @@ final class TestSchema
 
     public static function getSchema() : \Graphpinator\Typesystem\Schema
     {
-        return new \Graphpinator\Type\Schema(
+        return new \Graphpinator\Typesystem\Schema(
             self::getContainer(),
             self::getQuery(),
         );
@@ -101,7 +101,7 @@ final class TestSchema
                             TestSchema::getUploadInput()->notNull(),
                         ),
                     ])),
-                    \Graphpinator\Field\ResolvableField::create(
+                    \Graphpinator\Typesystem\Field\ResolvableField::create(
                         'fieldInputMultiUpload',
                         TestSchema::getUploadType()->notNullList(),
                         static function ($parent, \stdClass $fileInput) : array {
@@ -165,7 +165,7 @@ final class TestSchema
                 return true;
             }
 
-            protected function getFieldDefinition() : \Graphpinator\Field\ResolvableFieldSet
+            protected function getFieldDefinition() : \Graphpinator\Typesystem\Field\ResolvableFieldSet
             {
                 return new \Graphpinator\Typesystem\Field\ResolvableFieldSet([
                     new \Graphpinator\Typesystem\Field\ResolvableField(
@@ -193,7 +193,7 @@ final class TestSchema
         {
             protected const NAME = 'UploadInput';
 
-            protected function getFieldDefinition() : \Graphpinator\Argument\ArgumentSet
+            protected function getFieldDefinition() : \Graphpinator\Typesystem\Argument\ArgumentSet
             {
                 return new \Graphpinator\Typesystem\Argument\ArgumentSet([
                     new \Graphpinator\Typesystem\Argument\Argument(
