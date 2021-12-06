@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "infinityloop-dev/graphpinator",
-            "version": "v1.1.2",
+            "version": "v1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/infinityloop-dev/graphpinator.git",
-                "reference": "9ef61db5660749be46b505f005abc3411c37c3e6"
+                "reference": "808055061f6fbb8aa7fea856e3921bf1a3d78b3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/infinityloop-dev/graphpinator/zipball/9ef61db5660749be46b505f005abc3411c37c3e6",
-                "reference": "9ef61db5660749be46b505f005abc3411c37c3e6",
+                "url": "https://api.github.com/repos/infinityloop-dev/graphpinator/zipball/808055061f6fbb8aa7fea856e3921bf1a3d78b3e",
+                "reference": "808055061f6fbb8aa7fea856e3921bf1a3d78b3e",
                 "shasum": ""
             },
             "require": {
@@ -31,9 +31,9 @@
                 "psr/log": "^1.1.3 || ^2.0.0"
             },
             "require-dev": {
-                "infection/infection": "^0.23 || ^0.24 || ^0.25",
+                "infection/infection": "^0.25",
                 "infinityloop-dev/coding-standard": "^0.2",
-                "phpstan/phpstan": "^0.12 || ^1.0",
+                "phpstan/phpstan": "^1.0",
                 "phpunit/phpunit": "^9.3"
             },
             "suggest": {
@@ -67,9 +67,9 @@
             "homepage": "https://www.infinityloop.dev/",
             "support": {
                 "issues": "https://github.com/infinityloop-dev/graphpinator/issues",
-                "source": "https://github.com/infinityloop-dev/graphpinator/tree/v1.1.2"
+                "source": "https://github.com/infinityloop-dev/graphpinator/tree/v1.2.3"
             },
-            "time": "2021-11-09T11:40:08+00:00"
+            "time": "2021-12-04T16:36:07+00:00"
         },
         {
             "name": "infinityloop-dev/graphpinator-common",
