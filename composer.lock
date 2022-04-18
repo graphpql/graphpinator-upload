@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "infinityloop-dev/graphpinator",
-            "version": "v1.3",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/infinityloop-dev/graphpinator.git",
-                "reference": "dcd76fe3f4e0c5e26ea3cd78d2d6e24a311788a8"
+                "reference": "9debbea18eef6fbb97ef2d51377a0a7a9d6af632"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/infinityloop-dev/graphpinator/zipball/dcd76fe3f4e0c5e26ea3cd78d2d6e24a311788a8",
-                "reference": "dcd76fe3f4e0c5e26ea3cd78d2d6e24a311788a8",
+                "url": "https://api.github.com/repos/infinityloop-dev/graphpinator/zipball/9debbea18eef6fbb97ef2d51377a0a7a9d6af632",
+                "reference": "9debbea18eef6fbb97ef2d51377a0a7a9d6af632",
                 "shasum": ""
             },
             "require": {
@@ -67,9 +67,9 @@
             "homepage": "https://www.infinityloop.dev/",
             "support": {
                 "issues": "https://github.com/infinityloop-dev/graphpinator/issues",
-                "source": "https://github.com/infinityloop-dev/graphpinator/tree/v1.3"
+                "source": "https://github.com/infinityloop-dev/graphpinator/tree/v1.3.1"
             },
-            "time": "2022-04-06T12:48:56+00:00"
+            "time": "2022-04-14T11:42:08+00:00"
         },
         {
             "name": "infinityloop-dev/graphpinator-common",
