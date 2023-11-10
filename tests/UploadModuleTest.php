@@ -8,7 +8,7 @@ use \Infinityloop\Utils\Json;
 
 final class UploadModuleTest extends \PHPUnit\Framework\TestCase
 {
-    public function simpleDataProvider() : array
+    public static function simpleDataProvider() : array
     {
         return [
             [
@@ -117,31 +117,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /**
-     * @dataProvider simpleDataProvider
-     * @param string $map
-     * @param \Infinityloop\Utils\Json $request
-     * @param \Infinityloop\Utils\Json $expected
-     */
-    public function testSimple(string $map, Json $request, Json $expected) : void
-    {
-        $stream = $this->createStub(\Psr\Http\Message\StreamInterface::class);
-        $stream->method('getContents')->willReturn('test file');
-        $file = $this->createStub(\Psr\Http\Message\UploadedFileInterface::class);
-        $file->method('getClientFilename')->willReturn('a.txt');
-        $file->method('getStream')->willReturn($stream);
-        $fileProvider = $this->createStub(\Graphpinator\Upload\FileProvider::class);
-        $fileProvider->method('getMap')->willReturn(Json\MapJson::fromString($map));
-        $fileProvider->method('getFile')->willReturn($file);
-        $graphpinator = new \Graphpinator\Graphpinator(TestSchema::getSchema(), false, new \Graphpinator\Module\ModuleSet([
-            new \Graphpinator\Upload\UploadModule($fileProvider),
-        ]));
-        $result = $graphpinator->run(new \Graphpinator\Request\JsonRequestFactory($request));
-
-        self::assertSame($expected->toString(), $result->toString());
-    }
-
-    public function invalidDataProvider() : array
+    public static function invalidDataProvider() : array
     {
         return [
             [
@@ -236,6 +212,30 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @dataProvider simpleDataProvider
+     * @param string $map
+     * @param \Infinityloop\Utils\Json $request
+     * @param \Infinityloop\Utils\Json $expected
+     */
+    public function testSimple(string $map, Json $request, Json $expected) : void
+    {
+        $stream = $this->createStub(\Psr\Http\Message\StreamInterface::class);
+        $stream->method('getContents')->willReturn('test file');
+        $file = $this->createStub(\Psr\Http\Message\UploadedFileInterface::class);
+        $file->method('getClientFilename')->willReturn('a.txt');
+        $file->method('getStream')->willReturn($stream);
+        $fileProvider = $this->createStub(\Graphpinator\Upload\FileProvider::class);
+        $fileProvider->method('getMap')->willReturn(Json::fromString($map));
+        $fileProvider->method('getFile')->willReturn($file);
+        $graphpinator = new \Graphpinator\Graphpinator(TestSchema::getSchema(), false, new \Graphpinator\Module\ModuleSet([
+            new \Graphpinator\Upload\UploadModule($fileProvider),
+        ]));
+        $result = $graphpinator->run(new \Graphpinator\Request\JsonRequestFactory($request));
+
+        self::assertSame($expected->toString(), $result->toString());
+    }
+
+    /**
      * @dataProvider invalidDataProvider
      * @param string $map
      * @param \Infinityloop\Utils\Json $request
@@ -253,7 +253,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
         $file->method('getClientFilename')->willReturn('a.txt');
         $file->method('getStream')->willReturn($stream);
         $fileProvider = $this->createStub(\Graphpinator\Upload\FileProvider::class);
-        $fileProvider->method('getMap')->willReturn(Json\MapJson::fromString($map));
+        $fileProvider->method('getMap')->willReturn(Json::fromString($map));
         $fileProvider->method('getFile')->willReturn($file);
         $graphpinator = new \Graphpinator\Graphpinator(TestSchema::getSchema(), false, new \Graphpinator\Module\ModuleSet([
             new \Graphpinator\Upload\UploadModule($fileProvider),

@@ -6,8 +6,6 @@ namespace Graphpinator\Upload;
 
 final class UploadModule implements \Graphpinator\Module\Module
 {
-    use \Nette\SmartObject;
-
     public function __construct(
         private FileProvider $fileProvider,
     )
@@ -17,10 +15,11 @@ final class UploadModule implements \Graphpinator\Module\Module
     public function processRequest(\Graphpinator\Request\Request $request) : \Graphpinator\Request\Request
     {
         $variables = $request->getVariables();
+        $map = $this->fileProvider->getMap()
+            ?? \Infinityloop\Utils\Json::fromNative([]);
 
-        foreach ($this->fileProvider->getMap()
-            ?? [] as $fileKey => $locations) {
-            $fileValue = $this->fileProvider->getFile($fileKey);
+        foreach ($map as $fileKey => $locations) {
+            $fileValue = $this->fileProvider->getFile((string) $fileKey);
 
             foreach ($locations as $location) {
                 /**

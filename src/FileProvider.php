@@ -6,7 +6,7 @@ namespace Graphpinator\Upload;
 
 interface FileProvider
 {
-    public function getMap() : ?\Infinityloop\Utils\Json\MapJson;
+    public function getMap() : ?\Infinityloop\Utils\Json;
 
     public function getFile(string $key) : \Psr\Http\Message\UploadedFileInterface;
 }
