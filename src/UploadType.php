@@ -9,7 +9,7 @@ final class UploadType extends \Graphpinator\Typesystem\ScalarType
     protected const NAME = 'Upload';
     protected const DESCRIPTION = <<<'NOWDOC'
     Upload type - represents file which was send to server.
-    By GraphQL viewpoint it is scalar type, but it must be used as input only.;
+    By GraphQL viewpoint it is scalar type, but it must be used as input only.
     NOWDOC;
 
     public function __construct()
