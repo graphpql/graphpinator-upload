@@ -4,54 +4,48 @@ declare(strict_types = 1);
 
 namespace Graphpinator\Upload\Tests;
 
+use Graphpinator\SimpleContainer;
+use Graphpinator\Typesystem\Argument\Argument;
+use Graphpinator\Typesystem\Argument\ArgumentSet;
+use Graphpinator\Typesystem\Container;
+use Graphpinator\Typesystem\Field\ResolvableField;
+use Graphpinator\Typesystem\Field\ResolvableFieldSet;
+use Graphpinator\Typesystem\InputType;
+use Graphpinator\Typesystem\Schema;
+use Graphpinator\Typesystem\Type;
+use Graphpinator\Upload\UploadType;
+use Psr\Http\Message\UploadedFileInterface;
+
 final class TestSchema
 {
-    private static array $types = [];
-    private static ?\Graphpinator\Typesystem\Container $container = null;
+    public static ?Type $query = null;
+    public static ?UploadType $upload = null;
+    public static ?Type $uploadType = null;
+    public static ?InputType $uploadInput = null;
+    public static ?Container $container = null;
 
-    public static function getSchema() : \Graphpinator\Typesystem\Schema
+    public static function getSchema() : Schema
     {
-        return new \Graphpinator\Typesystem\Schema(
-            self::getContainer(),
-            self::getQuery(),
+        self::$query ??= self::getQuery();
+        self::$upload ??= new UploadType();
+        self::$uploadType ??= self::getUploadType();
+        self::$uploadInput ??= self::getUploadInput();
+        self::$container = new SimpleContainer([
+            'Query' => self::$query,
+            'Upload' => self::$upload,
+            'UploadType' => self::$uploadType,
+            'UploadInput' => self::$uploadInput,
+        ], []);
+
+        return new Schema(
+            self::$container,
+            self::$query,
         );
     }
 
-    public static function getType(string $name) : object
+    public static function getQuery() : Type
     {
-        if (\array_key_exists($name, self::$types)) {
-            return self::$types[$name];
-        }
-
-        self::$types[$name] = match ($name) {
-            'Query' => self::getQuery(),
-            'Upload' => new \Graphpinator\Upload\UploadType(),
-            'UploadType' => self::getUploadType(),
-            'UploadInput' => self::getUploadInput(),
-        };
-
-        return self::$types[$name];
-    }
-
-    public static function getContainer() : \Graphpinator\Typesystem\Container
-    {
-        if (self::$container !== null) {
-            return self::$container;
-        }
-
-        self::$container = new \Graphpinator\SimpleContainer([
-            'Query' => self::getType('Query'),
-            'Upload' => new \Graphpinator\Upload\UploadType(),
-            'UploadType' => self::getType('UploadType'),
-            'UploadInput' => self::getType('UploadInput'),
-        ], []);
-
-        return self::$container;
-    }
-
-    public static function getQuery() : \Graphpinator\Typesystem\Type
-    {
-        return new class extends \Graphpinator\Typesystem\Type
+        return new class extends Type
         {
             protected const NAME = 'Query';
 
@@ -60,60 +54,60 @@ final class TestSchema
                 return true;
             }
 
-            protected function getFieldDefinition() : \Graphpinator\Typesystem\Field\ResolvableFieldSet
+            protected function getFieldDefinition() : ResolvableFieldSet
             {
-                return new \Graphpinator\Typesystem\Field\ResolvableFieldSet([
-                    \Graphpinator\Typesystem\Field\ResolvableField::create(
+                return new ResolvableFieldSet([
+                    ResolvableField::create(
                         'fieldUpload',
-                        TestSchema::getUploadType()->notNull(),
-                        static function ($parent, ?\Psr\Http\Message\UploadedFileInterface $file) : \Psr\Http\Message\UploadedFileInterface {
+                        TestSchema::$uploadType->notNull(),
+                        static function ($parent, ?UploadedFileInterface $file) : UploadedFileInterface {
                             return $file;
                         },
-                    )->setArguments(new \Graphpinator\Typesystem\Argument\ArgumentSet([
-                        new \Graphpinator\Typesystem\Argument\Argument(
+                    )->setArguments(new ArgumentSet([
+                        new Argument(
                             'file',
-                            new \Graphpinator\Upload\UploadType(),
+                            new UploadType(),
                         ),
                     ])),
-                    \Graphpinator\Typesystem\Field\ResolvableField::create(
+                    ResolvableField::create(
                         'fieldMultiUpload',
-                        TestSchema::getUploadType()->notNullList(),
+                        TestSchema::$uploadType->notNullList(),
                         static function ($parent, array $files) : array {
                             return $files;
                         },
-                    )->setArguments(new \Graphpinator\Typesystem\Argument\ArgumentSet([
-                        new \Graphpinator\Typesystem\Argument\Argument(
+                    )->setArguments(new ArgumentSet([
+                        new Argument(
                             'files',
-                            (new \Graphpinator\Upload\UploadType())->list(),
+                            (new UploadType())->list(),
                         ),
                     ])),
-                    \Graphpinator\Typesystem\Field\ResolvableField::create(
+                    ResolvableField::create(
                         'fieldInputUpload',
-                        TestSchema::getUploadType()->notNull(),
-                        static function ($parent, \stdClass $fileInput) : \Psr\Http\Message\UploadedFileInterface {
+                        TestSchema::$uploadType->notNull(),
+                        static function ($parent, \stdClass $fileInput) : UploadedFileInterface {
                             return $fileInput->file;
                         },
-                    )->setArguments(new \Graphpinator\Typesystem\Argument\ArgumentSet([
-                        new \Graphpinator\Typesystem\Argument\Argument(
+                    )->setArguments(new ArgumentSet([
+                        new Argument(
                             'fileInput',
-                            TestSchema::getUploadInput()->notNull(),
+                            TestSchema::$uploadInput->notNull(),
                         ),
                     ])),
-                    \Graphpinator\Typesystem\Field\ResolvableField::create(
+                    ResolvableField::create(
                         'fieldInputMultiUpload',
-                        TestSchema::getUploadType()->notNullList(),
+                        TestSchema::$uploadType->notNullList(),
                         static function ($parent, \stdClass $fileInput) : array {
                             return $fileInput->files;
                         },
-                    )->setArguments(new \Graphpinator\Typesystem\Argument\ArgumentSet([
-                        new \Graphpinator\Typesystem\Argument\Argument(
+                    )->setArguments(new ArgumentSet([
+                        new Argument(
                             'fileInput',
-                            TestSchema::getUploadInput()->notNull(),
+                            TestSchema::$uploadInput->notNull(),
                         ),
                     ])),
-                    \Graphpinator\Typesystem\Field\ResolvableField::create(
+                    ResolvableField::create(
                         'fieldMultiInputUpload',
-                        TestSchema::getUploadType()->notNullList(),
+                        TestSchema::$uploadType->notNullList(),
                         static function ($parent, array $fileInputs) {
                             $return = [];
 
@@ -123,15 +117,15 @@ final class TestSchema
 
                             return $return;
                         },
-                    )->setArguments(new \Graphpinator\Typesystem\Argument\ArgumentSet([
-                        new \Graphpinator\Typesystem\Argument\Argument(
+                    )->setArguments(new ArgumentSet([
+                        new Argument(
                             'fileInputs',
-                            TestSchema::getUploadInput()->notNullList(),
+                            TestSchema::$uploadInput->notNullList(),
                         ),
                     ])),
-                    \Graphpinator\Typesystem\Field\ResolvableField::create(
+                    ResolvableField::create(
                         'fieldMultiInputMultiUpload',
-                        TestSchema::getUploadType()->notNullList(),
+                        TestSchema::$uploadType->notNullList(),
                         static function ($parent, array $fileInputs) {
                             $return = [];
 
@@ -141,10 +135,10 @@ final class TestSchema
 
                             return $return;
                         },
-                    )->setArguments(new \Graphpinator\Typesystem\Argument\ArgumentSet([
-                        new \Graphpinator\Typesystem\Argument\Argument(
+                    )->setArguments(new ArgumentSet([
+                        new Argument(
                             'fileInputs',
-                            TestSchema::getUploadInput()->notNullList(),
+                            TestSchema::$uploadInput->notNullList(),
                         ),
                     ])),
                 ]);
@@ -152,9 +146,9 @@ final class TestSchema
         };
     }
 
-    public static function getUploadType() : \Graphpinator\Typesystem\Type
+    public static function getUploadType() : Type
     {
-        return new class extends \Graphpinator\Typesystem\Type
+        return new class extends Type
         {
             protected const NAME = 'UploadType';
 
@@ -163,20 +157,20 @@ final class TestSchema
                 return true;
             }
 
-            protected function getFieldDefinition() : \Graphpinator\Typesystem\Field\ResolvableFieldSet
+            protected function getFieldDefinition() : ResolvableFieldSet
             {
-                return new \Graphpinator\Typesystem\Field\ResolvableFieldSet([
-                    new \Graphpinator\Typesystem\Field\ResolvableField(
+                return new ResolvableFieldSet([
+                    new ResolvableField(
                         'fileName',
-                        \Graphpinator\Typesystem\Container::String(),
-                        static function (\Psr\Http\Message\UploadedFileInterface $file) : string {
+                        Container::String(),
+                        static function (UploadedFileInterface $file) : string {
                             return $file->getClientFilename();
                         },
                     ),
-                    new \Graphpinator\Typesystem\Field\ResolvableField(
+                    new ResolvableField(
                         'fileContent',
-                        \Graphpinator\Typesystem\Container::String(),
-                        static function (\Psr\Http\Message\UploadedFileInterface $file) : string {
+                        Container::String(),
+                        static function (UploadedFileInterface $file) : string {
                             return $file->getStream()->getContents();
                         },
                     ),
@@ -185,22 +179,22 @@ final class TestSchema
         };
     }
 
-    public static function getUploadInput() : \Graphpinator\Typesystem\InputType
+    public static function getUploadInput() : InputType
     {
-        return new class extends \Graphpinator\Typesystem\InputType
+        return new class extends InputType
         {
             protected const NAME = 'UploadInput';
 
-            protected function getFieldDefinition() : \Graphpinator\Typesystem\Argument\ArgumentSet
+            protected function getFieldDefinition() : ArgumentSet
             {
-                return new \Graphpinator\Typesystem\Argument\ArgumentSet([
-                    new \Graphpinator\Typesystem\Argument\Argument(
+                return new ArgumentSet([
+                    new Argument(
                         'file',
-                        new \Graphpinator\Upload\UploadType(),
+                        new UploadType(),
                     ),
-                    new \Graphpinator\Typesystem\Argument\Argument(
+                    new Argument(
                         'files',
-                        (new \Graphpinator\Upload\UploadType())->list(),
+                        (new UploadType())->list(),
                     ),
                 ]);
             }

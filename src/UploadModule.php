@@ -4,7 +4,20 @@ declare(strict_types = 1);
 
 namespace Graphpinator\Upload;
 
-final class UploadModule implements \Graphpinator\Module\Module
+use Graphpinator\Module\Module;
+use Graphpinator\Normalizer\FinalizedRequest;
+use Graphpinator\Normalizer\NormalizedRequest;
+use Graphpinator\Parser\ParsedRequest;
+use Graphpinator\Request\Request;
+use Graphpinator\Resolver\Result;
+use Graphpinator\Upload\Exception\ConflictingMap;
+use Graphpinator\Upload\Exception\InvalidMap;
+use Graphpinator\Upload\Exception\OnlyVariablesSupported;
+use Graphpinator\Upload\Exception\UninitializedVariable;
+use Infinityloop\Utils\Json;
+use Psr\Http\Message\UploadedFileInterface;
+
+final readonly class UploadModule implements Module
 {
     public function __construct(
         private FileProvider $fileProvider,
@@ -12,29 +25,28 @@ final class UploadModule implements \Graphpinator\Module\Module
     {
     }
 
-    public function processRequest(\Graphpinator\Request\Request $request) : \Graphpinator\Request\Request
+    #[\Override]
+    public function processRequest(Request $request) : Request
     {
-        $variables = $request->getVariables();
+        $variables = $request->variables;
         $map = $this->fileProvider->getMap()
-            ?? \Infinityloop\Utils\Json::fromNative([]);
+            ?? Json::fromNative([]);
 
         foreach ($map as $fileKey => $locations) {
             $fileValue = $this->fileProvider->getFile((string) $fileKey);
 
             foreach ($locations as $location) {
-                /**
-                 * Array reverse is done so we can use array_pop (O(1)) instead of array_shift (O(n))
-                 */
+                // Array reverse is done so we can use array_pop (O(1)) instead of array_shift (O(n))
                 $keys = \array_reverse(\explode('.', $location));
 
                 if (\array_pop($keys) !== 'variables') {
-                    throw new \Graphpinator\Upload\Exception\OnlyVariablesSupported();
+                    throw new OnlyVariablesSupported();
                 }
 
                 $variableName = \array_pop($keys);
 
                 if (!\property_exists($variables, $variableName)) {
-                    throw new \Graphpinator\Upload\Exception\UninitializedVariable();
+                    throw new UninitializedVariable();
                 }
 
                 $variableValue = $variables->{$variableName};
@@ -45,34 +57,44 @@ final class UploadModule implements \Graphpinator\Module\Module
         return $request;
     }
 
-    public function processParsed(\Graphpinator\Parser\ParsedRequest $request) : \Graphpinator\Parser\ParsedRequest
+    #[\Override]
+    public function processParsed(ParsedRequest $request) : ParsedRequest
     {
         return $request;
     }
 
-    public function processNormalized(\Graphpinator\Normalizer\NormalizedRequest $request) : \Graphpinator\Normalizer\NormalizedRequest
+    #[\Override]
+    public function processNormalized(NormalizedRequest $request) : NormalizedRequest
     {
         return $request;
     }
 
-    public function processFinalized(\Graphpinator\Normalizer\FinalizedRequest $request) : \Graphpinator\Normalizer\FinalizedRequest
+    #[\Override]
+    public function processFinalized(FinalizedRequest $request) : FinalizedRequest
     {
         return $request;
     }
 
-    public function processResult(\Graphpinator\Result $result) : \Graphpinator\Result
+    #[\Override]
+    public function processResult(Result $result) : Result
     {
         return $result;
     }
 
+    /**
+     * @param list<string> $keys
+     * @param string|int|float|bool|list<mixed>|\stdClass|null $currentValue
+     * @param UploadedFileInterface $fileValue
+     * @return list<mixed>|\stdClass|UploadedFileInterface
+     */
     private function insertFiles(
         array &$keys,
         string|int|float|bool|array|\stdClass|null $currentValue,
-        \Psr\Http\Message\UploadedFileInterface $fileValue,
-    ) : array|\stdClass|\Psr\Http\Message\UploadedFileInterface
+        UploadedFileInterface $fileValue,
+    ) : array|\stdClass|UploadedFileInterface
     {
         if (\is_scalar($currentValue)) {
-            throw new \Graphpinator\Upload\Exception\ConflictingMap();
+            throw new ConflictingMap();
         }
 
         if (\count($keys) === 0) {
@@ -80,7 +102,7 @@ final class UploadModule implements \Graphpinator\Module\Module
                 return $fileValue;
             }
 
-            throw new \Graphpinator\Upload\Exception\InvalidMap();
+            throw new InvalidMap();
         }
 
         $index = \array_pop($keys);
@@ -102,11 +124,11 @@ final class UploadModule implements \Graphpinator\Module\Module
                 return $currentValue;
             }
 
-            throw new \Graphpinator\Upload\Exception\InvalidMap();
+            throw new InvalidMap();
         }
 
         if (!$currentValue instanceof \stdClass) {
-            throw new \Graphpinator\Upload\Exception\InvalidMap();
+            throw new InvalidMap();
         }
 
         if (!\property_exists($currentValue, $index)) {

@@ -4,9 +4,23 @@ declare(strict_types = 1);
 
 namespace Graphpinator\Upload\Tests;
 
-use \Infinityloop\Utils\Json;
+use Graphpinator\Graphpinator;
+use Graphpinator\Module\ModuleSet;
+use Graphpinator\Normalizer\Exception\VariableTypeMismatch;
+use Graphpinator\Request\JsonRequestFactory;
+use Graphpinator\Upload\Exception\ConflictingMap;
+use Graphpinator\Upload\Exception\InvalidMap;
+use Graphpinator\Upload\Exception\OnlyVariablesSupported;
+use Graphpinator\Upload\Exception\UninitializedVariable;
+use Graphpinator\Upload\FileProvider;
+use Graphpinator\Upload\UploadModule;
+use Graphpinator\Value\Exception\InvalidValue;
+use Infinityloop\Utils\Json;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UploadedFileInterface;
 
-final class UploadModuleTest extends \PHPUnit\Framework\TestCase
+final class UploadModuleTest extends TestCase
 {
     public static function simpleDataProvider() : array
     {
@@ -125,14 +139,14 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                 Json::fromNative((object) [
                     'query' => 'query queryName($var1: Upload) { fieldUpload(file: $var1) { fileName } }',
                 ]),
-                \Graphpinator\Upload\Exception\OnlyVariablesSupported::class,
+                OnlyVariablesSupported::class,
             ],
             [
                 '{ "0": ["variables.var1"] }',
                 Json::fromNative((object) [
                     'query' => 'query queryName($var1: Upload) { fieldUpload(file: $var1) { fileName } }',
                 ]),
-                \Graphpinator\Upload\Exception\UninitializedVariable::class,
+                UninitializedVariable::class,
             ],
             [
                 '{ "0": ["variables.var1"] }',
@@ -140,7 +154,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: Upload) { fieldUpload(file: $var1) { fileName } }',
                     'variables' => (object) ['var1' => 123],
                 ]),
-                \Graphpinator\Upload\Exception\ConflictingMap::class,
+                ConflictingMap::class,
             ],
             [
                 '{ "0": ["variables.var1"] }',
@@ -148,7 +162,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: Upload) { fieldUpload(file: $var1) { fileName } }',
                     'variables' => (object) ['var1' => []],
                 ]),
-                \Graphpinator\Upload\Exception\InvalidMap::class,
+                InvalidMap::class,
             ],
             [
                 '{ "0": ["variables.var1"] }',
@@ -156,7 +170,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: Upload) { fieldUpload(file: $var1) { fileName } }',
                     'variables' => (object) ['var1' => (object) []],
                 ]),
-                \Graphpinator\Upload\Exception\InvalidMap::class,
+                InvalidMap::class,
             ],
             [
                 '{ "0": ["variables.var1.invalid"] }',
@@ -164,7 +178,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: Upload) { fieldUpload(file: $var1) { fileName } }',
                     'variables' => (object) ['var1' => (object) []],
                 ]),
-                \Graphpinator\Exception\Value\InvalidValue::class,
+                InvalidValue::class,
                 'Invalid value resolved for type "Upload" - got object.',
             ],
             [
@@ -173,7 +187,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: [Upload]) { fieldMultiUpload(files: $var1) { fileName } }',
                     'variables' => (object) ['var1' => []],
                 ]),
-                \Graphpinator\Upload\Exception\InvalidMap::class,
+                InvalidMap::class,
             ],
             [
                 '{ "0": ["variables.var1.0", "variables.var1.1"] }',
@@ -181,7 +195,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: [Upload]) { fieldMultiUpload(files: $var1) { fileName } }',
                     'variables' => (object) ['var1' => (object) []],
                 ]),
-                \Graphpinator\Upload\Exception\InvalidMap::class,
+                InvalidMap::class,
             ],
             [
                 '{ "0": ["variables.var1.0"] }',
@@ -189,7 +203,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: UploadInput! = {}) { fieldInputUpload(fileInput: $var1) { fileName } }',
                     'variables' => (object) ['var1' => []],
                 ]),
-                \Graphpinator\Exception\Value\InvalidValue::class,
+                InvalidValue::class,
                 'Invalid value resolved for type "UploadInput" - got list.',
             ],
             [
@@ -198,7 +212,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: UploadInput) { fieldInputUpload(fileInput: $var1) { fileName } }',
                     'variables' => (object) ['var1' => null],
                 ]),
-                \Graphpinator\Normalizer\Exception\VariableTypeMismatch::class,
+                VariableTypeMismatch::class,
             ],
             [
                 '{ "0": ["variables.var1"] }',
@@ -206,7 +220,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
                     'query' => 'query queryName($var1: Int) { fieldInputUpload(fileInput: $var1) { fileName } }',
                     'variables' => (object) ['var1' => null],
                 ]),
-                \Graphpinator\Normalizer\Exception\VariableTypeMismatch::class,
+                VariableTypeMismatch::class,
             ],
         ];
     }
@@ -214,23 +228,23 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider simpleDataProvider
      * @param string $map
-     * @param \Infinityloop\Utils\Json $request
-     * @param \Infinityloop\Utils\Json $expected
+     * @param Json $request
+     * @param Json $expected
      */
     public function testSimple(string $map, Json $request, Json $expected) : void
     {
-        $stream = $this->createStub(\Psr\Http\Message\StreamInterface::class);
+        $stream = $this->createStub(StreamInterface::class);
         $stream->method('getContents')->willReturn('test file');
-        $file = $this->createStub(\Psr\Http\Message\UploadedFileInterface::class);
+        $file = $this->createStub(UploadedFileInterface::class);
         $file->method('getClientFilename')->willReturn('a.txt');
         $file->method('getStream')->willReturn($stream);
-        $fileProvider = $this->createStub(\Graphpinator\Upload\FileProvider::class);
+        $fileProvider = $this->createStub(FileProvider::class);
         $fileProvider->method('getMap')->willReturn(Json::fromString($map));
         $fileProvider->method('getFile')->willReturn($file);
-        $graphpinator = new \Graphpinator\Graphpinator(TestSchema::getSchema(), false, new \Graphpinator\Module\ModuleSet([
-            new \Graphpinator\Upload\UploadModule($fileProvider),
+        $graphpinator = new Graphpinator(TestSchema::getSchema(), false, new ModuleSet([
+            new UploadModule($fileProvider),
         ]));
-        $result = $graphpinator->run(new \Graphpinator\Request\JsonRequestFactory($request));
+        $result = $graphpinator->run(new JsonRequestFactory($request));
 
         self::assertSame($expected->toString(), $result->toString());
     }
@@ -238,7 +252,7 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider invalidDataProvider
      * @param string $map
-     * @param \Infinityloop\Utils\Json $request
+     * @param Json $request
      * @param string $exception
      */
     public function testInvalid(string $map, Json $request, string $exception, ?string $message = null) : void
@@ -247,17 +261,17 @@ final class UploadModuleTest extends \PHPUnit\Framework\TestCase
         $this->expectExceptionMessage($message
             ?? \constant($exception . '::MESSAGE'));
 
-        $stream = $this->createStub(\Psr\Http\Message\StreamInterface::class);
+        $stream = $this->createStub(StreamInterface::class);
         $stream->method('getContents')->willReturn('test file');
-        $file = $this->createStub(\Psr\Http\Message\UploadedFileInterface::class);
+        $file = $this->createStub(UploadedFileInterface::class);
         $file->method('getClientFilename')->willReturn('a.txt');
         $file->method('getStream')->willReturn($stream);
-        $fileProvider = $this->createStub(\Graphpinator\Upload\FileProvider::class);
+        $fileProvider = $this->createStub(FileProvider::class);
         $fileProvider->method('getMap')->willReturn(Json::fromString($map));
         $fileProvider->method('getFile')->willReturn($file);
-        $graphpinator = new \Graphpinator\Graphpinator(TestSchema::getSchema(), false, new \Graphpinator\Module\ModuleSet([
-            new \Graphpinator\Upload\UploadModule($fileProvider),
+        $graphpinator = new Graphpinator(TestSchema::getSchema(), false, new ModuleSet([
+            new UploadModule($fileProvider),
         ]));
-        $graphpinator->run(new \Graphpinator\Request\JsonRequestFactory($request));
+        $graphpinator->run(new JsonRequestFactory($request));
     }
 }
