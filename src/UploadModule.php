@@ -83,8 +83,10 @@ final readonly class UploadModule implements Module
 
     /**
      * @param list<string> $keys
+     * @phpcs:ignore
      * @param string|int|float|bool|list<mixed>|\stdClass|null $currentValue
      * @param UploadedFileInterface $fileValue
+     * @phpcs:ignore
      * @return list<mixed>|\stdClass|UploadedFileInterface
      */
     private function insertFiles(

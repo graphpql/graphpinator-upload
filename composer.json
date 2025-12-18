@@ -14,6 +14,8 @@
   "require": {
     "php": ">=8.2",
     "infinityloop-dev/graphpinator": "^2.0",
+    "infinityloop-dev/graphpinator-common": "^2.0",
+    "infinityloop-dev/graphpinator-parser": "^2.0",
     "infinityloop-dev/utils": "^2.3",
     "psr/http-message": "^2.0"
   },
@@ -30,6 +32,7 @@
   },
   "scripts": {
     "phpunit": "phpunit tests",
+    "phpunit-no-coverage": "phpunit tests --no-coverage",
     "infection": [
       "Composer\\Config::disableProcessTimeout",
       "infection -j$(nproc)"
