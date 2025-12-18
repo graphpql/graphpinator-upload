@@ -4,13 +4,20 @@ declare(strict_types = 1);
 
 namespace Graphpinator\Upload;
 
-final class UploadType extends \Graphpinator\Typesystem\ScalarType
+use Graphpinator\Typesystem\Attribute\Description;
+use Graphpinator\Typesystem\ScalarType;
+use Psr\Http\Message\UploadedFileInterface;
+
+/**
+ * @extends ScalarType<UploadedFileInterface>
+ */
+#[Description(<<<'NOWDOC'
+    Upload type - represents file which was send to server.
+    By GraphQL viewpoint it is scalar type, but it must be used as input only.;
+    NOWDOC)]
+final class UploadType extends ScalarType
 {
     protected const NAME = 'Upload';
-    protected const DESCRIPTION = <<<'NOWDOC'
-    Upload type - represents file which was send to server.
-    By GraphQL viewpoint it is scalar type, but it must be used as input only.
-    NOWDOC;
 
     public function __construct()
     {
@@ -19,8 +26,17 @@ final class UploadType extends \Graphpinator\Typesystem\ScalarType
         $this->setSpecifiedBy('https://github.com/jaydenseric/graphql-multipart-request-spec');
     }
 
-    public function validateNonNullValue(mixed $rawValue) : bool
+    #[\Override]
+    public function validateAndCoerceInput(mixed $rawValue) : ?UploadedFileInterface
     {
-        return $rawValue instanceof \Psr\Http\Message\UploadedFileInterface;
+        return $rawValue instanceof UploadedFileInterface
+            ? $rawValue
+            : null;
+    }
+
+    #[\Override]
+    public function coerceOutput(mixed $rawValue) : string|int|float|bool
+    {
+        throw new \LogicException('Upload type can not be used as output.');
     }
 }
