@@ -126,7 +126,7 @@ final class TestSchema
                     ResolvableField::create(
                         'fieldMultiInputMultiUpload',
                         TestSchema::$uploadType->notNullList(),
-                        static function ($parent, array $fileInputs) {
+                        static function ($parent, array $fileInputs) : array {
                             $return = [];
 
                             foreach ($fileInputs as $fileInput) {
@@ -163,14 +163,14 @@ final class TestSchema
                     new ResolvableField(
                         'fileName',
                         Container::String(),
-                        static function (UploadedFileInterface $file) : string {
+                        static function (UploadedFileInterface $file) : ?string {
                             return $file->getClientFilename();
                         },
                     ),
                     new ResolvableField(
                         'fileContent',
                         Container::String(),
-                        static function (UploadedFileInterface $file) : string {
+                        static function (UploadedFileInterface $file) : ?string {
                             return $file->getStream()->getContents();
                         },
                     ),
